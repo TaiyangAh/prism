@@ -8,6 +8,8 @@ contract PrismSale {
     address public owner;
     address public charity;
 
+    mapping(address => bool) sales;
+
     constructor() {
         totalSales = 0;
         maxSales = 100;
@@ -20,13 +22,19 @@ contract PrismSale {
         return totalSales < maxSales;
     }
 
+    function hasAccess() public view returns (bool) {
+        return sales[msg.sender];
+    }
+
     function buy() public payable returns (bool) {
         require(canBuy() == true, "can't buy this");
         require(msg.value == 0.01 ether, "incorrect amount");
+        require(hasAccess() == false, "already boughtopl");
 
         payable(owner).transfer((msg.value * 80) / 100);
         payable(charity).transfer((msg.value * 20) / 100);
 
+        sales[msg.sender] = true;
         totalSales = totalSales + 1;
         return true;
     }
